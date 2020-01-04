@@ -43,9 +43,7 @@ namespace Mobileroboter.Tinkerforge
             var distanceUs2 = new BrickletDistanceUS(Dist2Id, ipcon);
             var CompassBoxBricklet = new BrickletCompass(CompassBox, ipcon);
             var CompassRobotBricklet = new BrickletCompass(CompassRobot, ipcon);
-            var colorR = 0;
-            var colorG = 0;
-            var colorB = 0;
+
 
             while (true)
             {
@@ -56,17 +54,12 @@ namespace Mobileroboter.Tinkerforge
                 
                 _client.Publish("/mobile/distance",
                     Encoding.UTF8.GetBytes(
-                        "{{\n" +
+                        "{\n" +
                         $"\"robotHeading\":{robotHeading / 10},\n" +
                         $"\"boxHeading\":{boxHeading / 10},\n" +
                         $"\"dist1\":{val1},\n" +
-                        $"\"dist2\":{val2},\n" +
-                        "\"color\":{{\n" +
-                            $"\"red\":{colorR},\n" +
-                            $"\"blue\":{colorB},\n" +
-                            $"\"green\":{colorG}\n" +
-                            "}}\n" +
-                        "}}"),
+                        $"\"dist2\":{val2}\n" +
+                        "}"),
                     MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
 
                 Thread.Sleep(500);
@@ -77,21 +70,6 @@ namespace Mobileroboter.Tinkerforge
         public static double CalculateCM(int value)
         {
             return (value - 2.78) * 0.094;
-        }
-
-        public static string CalculateXY(double S_unten, double S_links)
-        {
-            var Grad_Box = 200 / 180 * Math.PI;
-            var Grad_Rob = 20 / 180 * Math.PI;
-            var Y_Box = 10;
-            var X_Box = 10;
-            var x = S_links * Math.Cos(Grad_Box - Grad_Rob) - S_unten * Math.Sin(Grad_Box - Grad_Rob);
-            var y = S_unten * Math.Cos(Grad_Box - Grad_Rob) + S_links * Math.Sin(Grad_Box - Grad_Rob);
-
-            if (x < 0 || Math.Cos(Grad_Box - Grad_Rob) - Math.Sin(Grad_Box - Grad_Rob) < 0) x = X_Box + x;
-            if (y < 0 || Math.Cos(Grad_Box - Grad_Rob) + Math.Sin(Grad_Box - Grad_Rob) < 0) y = Y_Box + y;
-
-            return $"X: {x}  Y:{y}";
         }
     }
 }
